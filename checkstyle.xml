@@ -250,17 +250,8 @@
 	</module>
 	<!--	<module name="NewlineAtEndOfFile"/>-->
 	<module name="SuppressWarningsFilter"/>
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> 0d8a8f9 (#1 Sprint 13 add-controllers)
 	<module name="SuppressionFilter">
 		<property name="file" value="suppressions.xml"/>
 		<property name="optional" value="false"/>
 	</module>
-<<<<<<< HEAD
-=======
->>>>>>> db1473a (Init)
-=======
->>>>>>> 0d8a8f9 (#1 Sprint 13 add-controllers)
 </module>
