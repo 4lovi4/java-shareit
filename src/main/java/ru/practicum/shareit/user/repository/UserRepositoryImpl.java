@@ -2,20 +2,36 @@ package ru.practicum.shareit.user.repository;
 
 import org.springframework.stereotype.Repository;
 import ru.practicum.shareit.user.User;
+import ru.practicum.shareit.user.service.UserNotFoundException;
 
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Repository
 public class UserRepositoryImpl implements UserRepository {
 
-    @Override
-    public List<User> findAllUsers() {
-        return null;
+    Map<Long, User> users;
+    private Long userCounter;
+
+    public UserRepositoryImpl() {
+        userCounter = 0L;
+        users = new HashMap<Long, User>();
     }
 
     @Override
-    public User findUserById(Long userId) {
-        return null;
+    public List<User> findAllUsers() {
+        return users.values()
+                .stream()
+                .sorted(Comparator.comparing(u -> u.getId()))
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public User findUserById(Long userId) throws UserNotFoundException {
+        return users.get(userId);
     }
 
     @Override
