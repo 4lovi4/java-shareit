@@ -17,6 +17,7 @@ import ru.practicum.shareit.user.exception.UserDuplicateException;
 import ru.practicum.shareit.user.exception.UserNotFoundException;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.validation.ConstraintViolationException;
 
 @ControllerAdvice
 @Slf4j
@@ -29,6 +30,7 @@ public class UserExceptionHandler {
     private static final String USER_VALIDATION_CODE = "USER_NOT_VALID";
 
     private final ObjectMapper objectMapper;
+
     @Autowired
     public UserExceptionHandler(ObjectMapper objectMapper) {
         this.objectMapper = objectMapper;
@@ -58,9 +60,15 @@ public class UserExceptionHandler {
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    ResponseEntity<String> handleValidationError(HttpServletRequest request, Exception exception) throws JsonProcessingException {
-        ErrorResponseModel error = new ErrorResponseModel(USER_VALIDATION_CODE, exception.getMessage(),
-                request.getRequestURL().toString());
+    ResponseEntity<String> handleValidationError(HttpServletRequest request, MethodArgumentNotValidException exception) throws JsonProcessingException {
+        StringBuilder errorStringBuilder = new StringBuilder();
+        exception.getBindingResult().getAllErrors().forEach(e ->
+                errorStringBuilder.append(e.getDefaultMessage() + ";"));
+        ErrorResponseModel error = new ErrorResponseModel(
+                USER_VALIDATION_CODE,
+                errorStringBuilder.toString(),
+                request.getRequestURL().toString()
+        );
         HttpHeaders headers = new HttpHeaders();
         headers.add(HEADER_KEY, HEADER_VALUE);
         return new ResponseEntity<>(objectMapper.writeValueAsString(error), headers, HttpStatus.BAD_REQUEST);

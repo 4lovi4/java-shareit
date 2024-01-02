@@ -38,7 +38,7 @@ public class UserRepositoryImpl implements UserRepository {
 
     @Override
     public User createUser(User user) throws UserDuplicateException {
-        if (users.values().contains(user)) {
+        if (users.containsValue(user)) {
             throw new UserDuplicateException(user);
         }
         Long userId = updateUserCounter();
@@ -70,6 +70,6 @@ public class UserRepositoryImpl implements UserRepository {
     }
 
     private Long updateUserCounter() {
-        return userCounter++;
+        return ++userCounter;
     }
 }
