@@ -1,4 +1,4 @@
-package ru.practicum.shareit.user;
+package ru.practicum.shareit.item;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -13,25 +13,25 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import ru.practicum.shareit.error.ErrorResponseModel;
-import ru.practicum.shareit.user.exception.UserDuplicateException;
+import ru.practicum.shareit.item.exception.ItemNotFoundException;
+import ru.practicum.shareit.item.exception.ItemWrongRequestException;
 import ru.practicum.shareit.user.exception.UserNotFoundException;
 
 import javax.servlet.http.HttpServletRequest;
 
 @ControllerAdvice
 @Slf4j
-public class UserExceptionHandler {
+public class ItemExceptionHandler {
 
     private static final String HEADER_KEY = "Content-Type";
     private static final String HEADER_VALUE = "application/json";
+    private static final String ITEM_NOT_FOUND_CODE = "ITEM_NOT_FOUND";
+    private static final String ITEM_WRONG_CODE = "ITEM_NOT_VALID";
     private static final String USER_NOT_FOUND_CODE = "USER_NOT_FOUND";
-    private static final String USER_DUPLICATION_CODE = "USER_DUPLICATED";
-    private static final String USER_VALIDATION_CODE = "USER_NOT_VALID";
-
     private final ObjectMapper objectMapper;
 
     @Autowired
-    public UserExceptionHandler(ObjectMapper objectMapper) {
+    public ItemExceptionHandler(ObjectMapper objectMapper) {
         this.objectMapper = objectMapper;
     }
 
@@ -39,7 +39,9 @@ public class UserExceptionHandler {
     @ExceptionHandler({UserNotFoundException.class})
     @ResponseStatus(HttpStatus.NOT_FOUND)
     ResponseEntity<String> handleUserNotFound(HttpServletRequest request, Exception exception) {
-        ErrorResponseModel error = new ErrorResponseModel(USER_NOT_FOUND_CODE, exception.getMessage(),
+        ErrorResponseModel error = new ErrorResponseModel(
+                USER_NOT_FOUND_CODE,
+                exception.getMessage(),
                 request.getRequestURL().toString());
         HttpHeaders headers = new HttpHeaders();
         headers.add(HEADER_KEY, HEADER_VALUE);
@@ -47,14 +49,30 @@ public class UserExceptionHandler {
     }
 
     @SneakyThrows
-    @ExceptionHandler({UserDuplicateException.class})
-    @ResponseStatus(HttpStatus.CONFLICT)
-    ResponseEntity<String> handleUserDuplication(HttpServletRequest request, Exception exception) {
-        ErrorResponseModel error = new ErrorResponseModel(USER_DUPLICATION_CODE, exception.getMessage(),
+    @ExceptionHandler({ItemNotFoundException.class})
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    ResponseEntity<String> handleItemNotFound(HttpServletRequest request, Exception exception) {
+        ErrorResponseModel error = new ErrorResponseModel(
+                ITEM_NOT_FOUND_CODE,
+                exception.getMessage(),
                 request.getRequestURL().toString());
         HttpHeaders headers = new HttpHeaders();
         headers.add(HEADER_KEY, HEADER_VALUE);
-        return new ResponseEntity<>(objectMapper.writeValueAsString(error), headers, HttpStatus.CONFLICT);
+        return new ResponseEntity<>(objectMapper.writeValueAsString(error), headers, HttpStatus.NOT_FOUND);
+    }
+
+    @SneakyThrows
+    @ExceptionHandler(ItemWrongRequestException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    ResponseEntity<String> handleWrongRequestError(HttpServletRequest request, Exception exception) {
+        ErrorResponseModel error = new ErrorResponseModel(
+                ITEM_WRONG_CODE,
+                exception.getMessage(),
+                request.getRequestURL().toString()
+        );
+        HttpHeaders headers = new HttpHeaders();
+        headers.add(HEADER_KEY, HEADER_VALUE);
+        return new ResponseEntity<>(objectMapper.writeValueAsString(error), headers, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -64,7 +82,7 @@ public class UserExceptionHandler {
         exception.getBindingResult().getAllErrors().forEach(e ->
                 errorStringBuilder.append(e.getDefaultMessage() + ";"));
         ErrorResponseModel error = new ErrorResponseModel(
-                USER_VALIDATION_CODE,
+                ITEM_WRONG_CODE,
                 errorStringBuilder.toString(),
                 request.getRequestURL().toString()
         );

@@ -49,15 +49,20 @@ public class UserRepositoryImpl implements UserRepository {
 
     @Override
     public User updateUser(Long userId, User user) throws UserNotFoundException{
-        User userStored = users.get(userId);
-        if (!users.containsKey(userId)) {
-            throw new UserNotFoundException(userId);
+        Optional<Map.Entry<Long, User>> userDuplicated = users
+                .entrySet()
+                .stream()
+                .filter(u -> !u.getKey().equals(userId) && u.getValue().equals(user))
+                .findAny();
+        if (userDuplicated.isPresent()) {
+            throw new UserDuplicateException(user);
         }
-        String newEmail = user.getEmail();
-        userStored.setEmail(newEmail);
-        String newName = user.getName();
-        if (!Objects.isNull(newName)) {
-            userStored.setName(newName);
+        User userStored = findUserById(userId);
+        if (!Objects.isNull(user.getEmail())) {
+            userStored.setEmail(user.getEmail());
+        }
+        if (!Objects.isNull(user.getName())) {
+            userStored.setName(user.getName());
         }
         return userStored;
     }
