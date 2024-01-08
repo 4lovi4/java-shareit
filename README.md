@@ -1,2 +1,2 @@
 # java-shareit
-Template repository for Shareit project.
+alexey0dyatlov Shareit project implementation.
