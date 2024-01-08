@@ -6,7 +6,6 @@ import lombok.RequiredArgsConstructor;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotEmpty;
 
-
 @Data
 @RequiredArgsConstructor
 public class User {
