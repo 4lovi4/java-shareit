@@ -26,15 +26,14 @@ public class ItemRepositoryImpl implements ItemRepository {
     @Override
     public List<Item> findAllItemsForUser(Long userId) {
         List<Item> userItems = items.get(userId);
-        return Objects.isNull(userItems) ?
-                new ArrayList<>() :
-                userItems;
+        return Objects.isNull(userItems) ? new ArrayList<>() : userItems;
     }
 
     @Override
     public Item findItemById(Long userId, Long itemId) throws ItemNotFoundException {
         List<Item> allItems = getAllUsersItems();
-        Optional<Item> itemById = allItems.stream()
+        Optional<Item> itemById = allItems
+                .stream()
                 .filter(it -> Objects.equals(it.getId(), itemId))
                 .findAny();
         if (itemById.isEmpty()) {
@@ -57,7 +56,8 @@ public class ItemRepositoryImpl implements ItemRepository {
     public Item updateItem(Long userId, Long itemId, Item item) {
         Optional<Item> itemOptional = findAllItemsForUser(userId)
                 .stream()
-                .filter(it -> itemId.equals(it.getId())).findAny();
+                .filter(it -> itemId.equals(it.getId()))
+                .findAny();
         if (itemOptional.isEmpty()) {
             throw new ItemNotFoundException(itemId);
         }
@@ -85,14 +85,9 @@ public class ItemRepositoryImpl implements ItemRepository {
         List<Item> searchItems = new ArrayList<>();
         if (!text.isBlank()) {
             List<Item> allItems = getAllUsersItems();
-            searchItems = allItems.stream()
-                    .filter(item -> (item.getName().toLowerCase()
-                            .contains(text.toLowerCase()) ||
-                            item.getDescription().toLowerCase()
-                                    .contains(text.toLowerCase())) &&
-                            item.getAvailable()
-                    )
-                    .collect(Collectors.toList());
+            searchItems = allItems.stream().filter(item -> (item.getName().toLowerCase().contains(text.toLowerCase()) ||
+                    item.getDescription().toLowerCase().contains(text.toLowerCase())) &&
+                    item.getAvailable()).collect(Collectors.toList());
         }
         return searchItems;
     }
@@ -102,8 +97,7 @@ public class ItemRepositoryImpl implements ItemRepository {
     }
 
     private List<Item> getAllUsersItems() {
-        return items
-                .values()
+        return items.values()
                 .stream()
                 .flatMap(Collection::stream)
                 .collect(Collectors.toList());

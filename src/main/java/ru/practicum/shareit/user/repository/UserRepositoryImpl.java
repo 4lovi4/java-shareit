@@ -48,7 +48,7 @@ public class UserRepositoryImpl implements UserRepository {
     }
 
     @Override
-    public User updateUser(Long userId, User user) throws UserNotFoundException{
+    public User updateUser(Long userId, User user) throws UserNotFoundException {
         Optional<Map.Entry<Long, User>> userDuplicated = users
                 .entrySet()
                 .stream()

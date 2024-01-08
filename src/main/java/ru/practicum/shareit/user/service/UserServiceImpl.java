@@ -3,10 +3,14 @@ package ru.practicum.shareit.user.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.user.User;
+import ru.practicum.shareit.user.dto.UserDto;
+import ru.practicum.shareit.user.dto.UserMapper;
 import ru.practicum.shareit.user.repository.UserRepository;
-import ru.practicum.shareit.user.repository.UserRepositoryImpl;
 
 import java.util.List;
+import java.util.stream.Collectors;
+
+import static ru.practicum.shareit.user.dto.UserMapper.toUserDto;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -19,23 +23,26 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<User> getAllUsers() {
-        return userRepository.findAllUsers();
+    public List<UserDto> getAllUsers() {
+        return userRepository.findAllUsers()
+                .stream()
+                .map(UserMapper::toUserDto)
+                .collect(Collectors.toList());
     }
 
     @Override
-    public User getUserById(Long userId) {
-        return userRepository.findUserById(userId);
+    public UserDto getUserById(Long userId) {
+        return toUserDto(userRepository.findUserById(userId));
     }
 
     @Override
-    public User addUser(User user) {
-        return userRepository.createUser(user);
+    public UserDto addUser(User user) {
+        return toUserDto(userRepository.createUser(user));
     }
 
     @Override
-    public User updateUser(Long userId, User user) {
-        return userRepository.updateUser(userId, user);
+    public UserDto updateUser(Long userId, User user) {
+        return toUserDto(userRepository.updateUser(userId, user));
     }
 
     @Override
