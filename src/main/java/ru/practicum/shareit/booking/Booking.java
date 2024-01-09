@@ -11,4 +11,5 @@ public class Booking {
     private LocalDateTime start;
     private LocalDateTime end;
     private Long booker;
+    private BookingStatusEnum status;
 }

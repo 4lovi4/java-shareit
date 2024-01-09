@@ -5,11 +5,11 @@ import org.springframework.stereotype.Service;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.ItemMapper;
 import ru.practicum.shareit.item.exception.ItemWrongRequestException;
-import ru.practicum.shareit.item.Item;
 import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.user.repository.UserRepository;
 
 import static ru.practicum.shareit.item.dto.ItemMapper.toItemDto;
+import static ru.practicum.shareit.item.dto.ItemMapper.toItem;
 
 import java.util.List;
 import java.util.Objects;
@@ -46,20 +46,20 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public ItemDto createItem(Long userId, Item item) {
+    public ItemDto createItem(Long userId, ItemDto itemDto) {
         if (Objects.isNull(userId)) {
             throw new ItemWrongRequestException(USER_NOT_PROVIDED);
         }
         userRepository.findUserById(userId);
-        return toItemDto(itemRepository.createItem(userId, item));
+        return toItemDto(itemRepository.createItem(userId, toItem(itemDto)));
     }
 
     @Override
-    public ItemDto updateItem(Long userId, Long itemId, Item item) {
+    public ItemDto updateItem(Long userId, Long itemId, ItemDto itemDto) {
         if (Objects.isNull(userId)) {
             throw new ItemWrongRequestException(USER_NOT_PROVIDED);
         }
-        return toItemDto(itemRepository.updateItem(userId, itemId, item));
+        return toItemDto(itemRepository.updateItem(userId, itemId, toItem(itemDto)));
     }
 
     @Override

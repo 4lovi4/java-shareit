@@ -1,13 +1,13 @@
 package ru.practicum.shareit.item;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.RequiredArgsConstructor;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
 @Data
-@RequiredArgsConstructor
+@AllArgsConstructor
 public class Item {
     private Long id;
     @NotBlank(message = "Поле name не должно быть пустым")
@@ -18,4 +18,10 @@ public class Item {
     private Boolean available;
     private Long owner;
     private Long request;
+
+    public Item(String name, String description, Boolean available) {
+        this.name = name;
+        this.description = description;
+        this.available = available;
+    }
 }

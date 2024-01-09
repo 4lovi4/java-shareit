@@ -9,7 +9,8 @@ public class BookingMapper {
                 booking.getItem(),
                 booking.getStart(),
                 booking.getEnd(),
-                booking.getBooker()
+                booking.getBooker(),
+                booking.getStatus()
         );
     }
 }

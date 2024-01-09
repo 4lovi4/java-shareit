@@ -28,6 +28,7 @@ public class ItemExceptionHandler {
     private static final String ITEM_NOT_FOUND_CODE = "ITEM_NOT_FOUND";
     private static final String ITEM_WRONG_CODE = "ITEM_NOT_VALID";
     private static final String USER_NOT_FOUND_CODE = "USER_NOT_FOUND";
+    private static final String UNEXPECTED_ERROR_CODE = "UNEXPECTED_SERVER_ERROR";
     private final ObjectMapper objectMapper;
 
     @Autowired
@@ -89,5 +90,19 @@ public class ItemExceptionHandler {
         HttpHeaders headers = new HttpHeaders();
         headers.add(HEADER_KEY, HEADER_VALUE);
         return new ResponseEntity<>(objectMapper.writeValueAsString(error), headers, HttpStatus.BAD_REQUEST);
+    }
+
+    @SneakyThrows
+    @ExceptionHandler(Exception.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    ResponseEntity<String> handleUnexpectedException(HttpServletRequest request, Exception exception) {
+        ErrorResponseModel error = new ErrorResponseModel(
+                UNEXPECTED_ERROR_CODE,
+                exception.getMessage(),
+                request.getRequestURL().toString()
+        );
+        HttpHeaders headers = new HttpHeaders();
+        headers.add(HEADER_KEY, HEADER_VALUE);
+        return new ResponseEntity<>(objectMapper.writeValueAsString(error), headers, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }
