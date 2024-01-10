@@ -93,7 +93,7 @@ public class ItemExceptionHandler {
     }
 
     @SneakyThrows
-    @ExceptionHandler(Exception.class)
+    @ExceptionHandler(Throwable.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     ResponseEntity<String> handleUnexpectedException(HttpServletRequest request, Exception exception) {
         ErrorResponseModel error = new ErrorResponseModel(

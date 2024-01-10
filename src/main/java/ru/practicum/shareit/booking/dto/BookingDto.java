@@ -2,7 +2,7 @@ package ru.practicum.shareit.booking.dto;
 
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
-import ru.practicum.shareit.booking.BookingStatusEnum;
+import ru.practicum.shareit.booking.BookingStatus;
 
 import java.time.LocalDateTime;
 
@@ -14,5 +14,5 @@ public class BookingDto {
     private final LocalDateTime start;
     private final LocalDateTime end;
     private final Long booker;
-    private final BookingStatusEnum status;
+    private final BookingStatus status;
 }
