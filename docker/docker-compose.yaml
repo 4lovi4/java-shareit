@@ -1,0 +1,16 @@
+version: '3.8'
+services:
+  shareit_db:
+    image: postgres:latest
+    container_name: postgres_shareit
+    restart: always
+    environment:
+      - POSTGRES_USER=practicum
+      - POSTGRES_PASSWORD=shareit
+    ports:
+      - '5432:5432'
+    volumes:
+      - ./shareit_db:/var/lib/postgresql/data
+volumes:
+  shareit_db:
+    driver: local
