@@ -50,7 +50,7 @@ public class ItemServiceImpl implements ItemService {
         if (Objects.isNull(userId)) {
             throw new ItemWrongRequestException(USER_NOT_PROVIDED);
         }
-        userRepository.findUserById(userId);
+        userRepository.findById(userId);
         return toItemDto(itemRepository.createItem(userId, toItem(itemDto)));
     }
 

@@ -24,7 +24,7 @@ public class UserRepositoryImpl implements UserRepository {
     }
 
     @Override
-    public List<User> findAllUsers() {
+    public List<User> findAll() {
         return users.values()
                 .stream()
                 .sorted(Comparator.comparing(User::getId))
@@ -32,7 +32,7 @@ public class UserRepositoryImpl implements UserRepository {
     }
 
     @Override
-    public User findUserById(Long userId) throws UserNotFoundException {
+    public User findById(Long userId) throws UserNotFoundException {
         User user = users.get(userId);
         if (Objects.isNull(user)) {
             throw new UserNotFoundException(userId);
@@ -61,7 +61,7 @@ public class UserRepositoryImpl implements UserRepository {
         if (userDuplicated.isPresent()) {
             throw new UserDuplicateException(user);
         }
-        User userStored = findUserById(userId);
+        User userStored = findById(userId);
         if (!Objects.isNull(user.getEmail())) {
             userStored.setEmail(user.getEmail());
         }
@@ -72,7 +72,7 @@ public class UserRepositoryImpl implements UserRepository {
     }
 
     @Override
-    public int deleteUser(Long userId) {
+    public int deleteById(Long userId) {
         int userDeleted = users.containsKey(userId) ? 1 : 0;
         users.remove(userId);
         return userDeleted;
