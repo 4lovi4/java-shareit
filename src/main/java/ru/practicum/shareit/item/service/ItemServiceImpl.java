@@ -2,10 +2,13 @@ package ru.practicum.shareit.item.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import ru.practicum.shareit.item.Item;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.ItemMapper;
 import ru.practicum.shareit.item.exception.ItemWrongRequestException;
 import ru.practicum.shareit.item.repository.ItemRepository;
+import ru.practicum.shareit.user.User;
+import ru.practicum.shareit.user.exception.UserNotFoundException;
 import ru.practicum.shareit.user.repository.UserRepository;
 
 import static ru.practicum.shareit.item.dto.ItemMapper.toItemDto;
@@ -31,7 +34,7 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public List<ItemDto> findAllItemsForUser(Long userId) {
-        return itemRepository.findAllItemsForUser(userId)
+        return itemRepository.findByOwner(userId)
                 .stream()
                 .map(ItemMapper::toItemDto)
                 .collect(Collectors.toList());
@@ -42,7 +45,7 @@ public class ItemServiceImpl implements ItemService {
         if (Objects.isNull(userId)) {
             throw new ItemWrongRequestException(USER_NOT_PROVIDED);
         }
-        return toItemDto(itemRepository.findItemById(userId, itemId));
+        return toItemDto(itemRepository.findById(userId, itemId));
     }
 
     @Override
@@ -50,8 +53,12 @@ public class ItemServiceImpl implements ItemService {
         if (Objects.isNull(userId)) {
             throw new ItemWrongRequestException(USER_NOT_PROVIDED);
         }
-        userRepository.findById(userId);
-        return toItemDto(itemRepository.createItem(userId, toItem(itemDto)));
+        User owner = userRepository.findById(userId).orElseThrow(
+                () -> { throw new UserNotFoundException(userId); }
+        );
+        Item newItem = toItem(itemDto);
+        newItem.setOwner(owner);
+        return toItemDto(itemRepository.save(newItem));
     }
 
     @Override
@@ -59,7 +66,9 @@ public class ItemServiceImpl implements ItemService {
         if (Objects.isNull(userId)) {
             throw new ItemWrongRequestException(USER_NOT_PROVIDED);
         }
-        return toItemDto(itemRepository.updateItem(userId, itemId, toItem(itemDto)));
+        Item itemModified = toItem(itemDto);
+        itemModified.setId(itemId);
+        return toItemDto(itemRepository.save(itemModified));
     }
 
     @Override
@@ -67,7 +76,7 @@ public class ItemServiceImpl implements ItemService {
         if (Objects.isNull(userId)) {
             throw new ItemWrongRequestException(USER_NOT_PROVIDED);
         }
-        return itemRepository.findItemsByText(searchText)
+        return itemRepository.findByNameOrDescriptionContainingIgnoreCase(searchText)
                 .stream()
                 .map(ItemMapper::toItemDto)
                 .collect(Collectors.toList());

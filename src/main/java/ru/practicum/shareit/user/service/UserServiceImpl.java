@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.dto.UserMapper;
+import ru.practicum.shareit.user.exception.UserNotFoundException;
 import ru.practicum.shareit.user.repository.UserRepository;
 
 import java.util.List;
@@ -32,17 +33,19 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDto getUserById(Long userId) {
-        return toUserDto(userRepository.findById(userId));
+        return toUserDto(userRepository.findById(userId).orElseThrow(() ->
+                new UserNotFoundException(userId)));
     }
 
     @Override
     public UserDto addUser(User user) {
-        return toUserDto(userRepository.createUser(user));
+        return toUserDto(userRepository.save(user));
     }
 
     @Override
     public UserDto updateUser(Long userId, User user) {
-        return toUserDto(userRepository.updateUser(userId, user));
+        user.setId(userId);
+        return toUserDto(userRepository.save(user));
     }
 
     @Override

@@ -6,10 +6,10 @@ public class BookingMapper {
     public static BookingDto toBookingDto(Booking booking) {
         return new BookingDto(
                 booking.getId(),
-                booking.getItem(),
+                booking.getItem().getId(),
                 booking.getStart(),
                 booking.getEnd(),
-                booking.getBooker(),
+                booking.getBooker().getId(),
                 booking.getStatus()
         );
     }

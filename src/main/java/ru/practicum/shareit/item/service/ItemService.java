@@ -15,4 +15,3 @@ public interface ItemService {
 
     List<ItemDto> findItemsByText(Long userId, String text);
 }
-
