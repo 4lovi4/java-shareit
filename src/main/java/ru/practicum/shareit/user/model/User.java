@@ -1,17 +1,25 @@
-package ru.practicum.shareit.user;
+package ru.practicum.shareit.user.model;
 
-import lombok.Builder;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Table;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotEmpty;
 
 @Data
 @RequiredArgsConstructor
+@AllArgsConstructor
+@NoArgsConstructor(force = true)
 @Entity
 @Table(name = "users", schema = "public")
 public class User {
@@ -25,5 +33,5 @@ public class User {
     @NotEmpty(message = "Поле email не может быть пустым")
     @Email(message = "email должен соответствовать паттерну name@domen.zone и содержать @")
     @Column(name = "email", nullable = false)
-    private String email;
+    private final String email;
 }

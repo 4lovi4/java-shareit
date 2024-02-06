@@ -4,14 +4,15 @@ package ru.practicum.shareit.item.repository;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import ru.practicum.shareit.item.Item;
+import ru.practicum.shareit.item.model.Item;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface ItemRepository extends JpaRepository<Item, Long> {
     List<Item> findByOwner(Long userId);
 
-    Item findById(Long userId, Long itemId);
+    Optional<Item> findByOwnerAndId(Long userId, Long itemId);
 
     @Query("select it from Item it " +
             "where lower(it.name) like lower(concat('%', :text, '%')) " +
