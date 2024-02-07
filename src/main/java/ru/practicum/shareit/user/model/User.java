@@ -33,5 +33,6 @@ public class User {
     @NotEmpty(message = "Поле email не может быть пустым")
     @Email(message = "email должен соответствовать паттерну name@domen.zone и содержать @")
     @Column(name = "email", nullable = false)
-    private final String email;
+    @NonNull
+    private String email;
 }

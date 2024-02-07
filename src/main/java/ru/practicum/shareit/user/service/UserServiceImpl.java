@@ -10,6 +10,7 @@ import ru.practicum.shareit.user.exception.UserNotFoundException;
 import ru.practicum.shareit.user.repository.UserRepository;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static ru.practicum.shareit.user.dto.UserMapper.toUserDto;
@@ -41,22 +42,30 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserDto addUser(UserDto userDto) {
         User user = UserMapper.toUser(userDto);
-        if (userRepository.findByEmail(user.getEmail()).isPresent()) {
-            throw new UserDuplicateException(user);
-        }
+//        if (userRepository.findByEmail(user.getEmail()).isPresent()) {
+//            throw new UserDuplicateException(user);
+//        }
         return toUserDto(userRepository.save(user));
     }
 
     @Override
     public UserDto updateUser(Long userId, UserDto userDto) {
-        User user = UserMapper.toUser(userDto);
-        if (userRepository.findById(userId).isEmpty()) {
-            throw new UserNotFoundException(userId);
+        User user = userRepository.findById(userId).orElseThrow(() ->
+                new UserNotFoundException(userId)
+        );
+        User userUpdated = UserMapper.toUser(userDto);
+        String updateEmail = userDto.getEmail();
+        String updateName = userDto.getName();
+
+        if (Objects.nonNull(updateEmail)) {
+//            if (userRepository.findByEmailAndIdNot(updateEmail, user.getId()).isPresent()) {
+//                throw new UserDuplicateException(user);
+//            }
+            user.setEmail(updateEmail);
         }
-        if (userRepository.findByEmail(user.getEmail()).isPresent()) {
-            throw new UserDuplicateException(user);
+        if (Objects.nonNull(updateName)) {
+            user.setName(updateName);
         }
-        user.setId(userId);
         return toUserDto(userRepository.save(user));
     }
 

@@ -15,5 +15,5 @@ public class UserDto {
     private String name;
     @NotEmpty(message = "Поле email не может быть пустым")
     @Email(message = "email должен соответствовать паттерну name@domen.zone и содержать @")
-    private final String email;
+    private String email;
 }

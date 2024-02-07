@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -28,6 +29,7 @@ public class ShareItExceptionHandler {
     private static final String HEADER_VALUE = "application/json";
     private static final String USER_NOT_FOUND_CODE = "USER_NOT_FOUND";
     private static final String USER_DUPLICATION_CODE = "USER_DUPLICATED";
+    private static final String DATA_VIOLATION_ERROR_CODE = "DATA_VIOLATED";
     private static final String VALIDATION_CODE = "PAYLOAD_NOT_VALID";
     private static final String ITEM_NOT_FOUND_CODE = "ITEM_NOT_FOUND";
     private static final String ITEM_WRONG_CODE = "ITEM_NOT_VALID";
@@ -83,6 +85,17 @@ public class ShareItExceptionHandler {
     @ResponseStatus(HttpStatus.CONFLICT)
     ResponseEntity<String> handleUserDuplication(HttpServletRequest request, Exception exception) {
         ErrorResponseModel error = new ErrorResponseModel(USER_DUPLICATION_CODE, exception.getMessage(),
+                request.getRequestURL().toString());
+        HttpHeaders headers = new HttpHeaders();
+        headers.add(HEADER_KEY, HEADER_VALUE);
+        return new ResponseEntity<>(objectMapper.writeValueAsString(error), headers, HttpStatus.CONFLICT);
+    }
+
+    @SneakyThrows
+    @ExceptionHandler({DataIntegrityViolationException.class})
+    @ResponseStatus(HttpStatus.CONFLICT)
+    ResponseEntity<String> handleUserDataIntegrityViolation(HttpServletRequest request, DataIntegrityViolationException exception) {
+        ErrorResponseModel error = new ErrorResponseModel(DATA_VIOLATION_ERROR_CODE, exception.getMessage(),
                 request.getRequestURL().toString());
         HttpHeaders headers = new HttpHeaders();
         headers.add(HEADER_KEY, HEADER_VALUE);
