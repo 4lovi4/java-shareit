@@ -2,9 +2,9 @@ package ru.practicum.shareit.item.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import ru.practicum.shareit.booking.dto.NearBookingDto;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.repository.BookingRepository;
-import ru.practicum.shareit.booking.dto.NearBookingDto;
 import ru.practicum.shareit.item.dto.ItemWithBookingDto;
 import ru.practicum.shareit.item.exception.ItemNotFoundException;
 import ru.practicum.shareit.item.model.Item;
@@ -16,9 +16,9 @@ import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.exception.UserNotFoundException;
 import ru.practicum.shareit.user.repository.UserRepository;
 
+import static ru.practicum.shareit.booking.dto.BookingMapper.toNearBooking;
 import static ru.practicum.shareit.item.dto.ItemMapper.toItemDto;
 import static ru.practicum.shareit.item.dto.ItemMapper.toItem;
-import static ru.practicum.shareit.booking.dto.BookingMapper.toNearBooking;
 import static ru.practicum.shareit.item.dto.ItemMapper.toItemWithBookingDto;
 
 import java.time.LocalDateTime;
@@ -54,10 +54,11 @@ public class ItemServiceImpl implements ItemService {
             throw new ItemWrongRequestException(USER_NOT_PROVIDED);
         }
         LocalDateTime currentTime = LocalDateTime.now();
-        List<ItemWithBookingDto> itemsWithBooking = itemRepository.findByOwner(userId)
+
+        return itemRepository.findByOwner(userId)
                 .stream().map(it ->
                 {
-                    Set<Booking> itBookings =  it.getBookings();
+                    Set<Booking> itBookings = it.getBookings();
                     if (itBookings.isEmpty()) {
                         return it;
                     }
@@ -76,8 +77,6 @@ public class ItemServiceImpl implements ItemService {
                 })
                 .map(ItemMapper::toItemWithBookingDto)
                 .collect(Collectors.toList());
-
-        return itemsWithBooking;
     }
 
     @Override
@@ -85,21 +84,24 @@ public class ItemServiceImpl implements ItemService {
         if (Objects.isNull(userId)) {
             throw new ItemWrongRequestException(USER_NOT_PROVIDED);
         }
-        Item item = itemRepository.findByOwnerAndId(userId, itemId)
+        User owner = userRepository.findById(userId).orElseThrow(
+                () -> new UserNotFoundException(userId)
+        );
+        Item item = itemRepository.findByIdAndOwner(itemId, owner)
                 .orElseThrow(() -> new ItemNotFoundException(itemId));
         LocalDateTime currentTime = LocalDateTime.now();
         Optional<Booking> nextBooking = bookingRepository.findFirstByItem_IdAndStartAfterOrderByStartAsc(item.getId(), currentTime);
         Optional<Booking> lastBooking = bookingRepository.findFirstByItem_IdAndStartBeforeOrderByStartDesc(item.getId(), currentTime);
         ItemWithBookingDto itemDto = toItemWithBookingDto(item);
-        nextBooking.ifPresent((booking) -> {
+        nextBooking.ifPresent(booking -> {
             NearBookingDto nextNearBookingDto = toNearBooking(booking);
             itemDto.setNextBooking(nextNearBookingDto);
         });
-        lastBooking.ifPresent((booking) -> {
+        lastBooking.ifPresent(booking -> {
             NearBookingDto lastNearBookingDto = toNearBooking(booking);
             itemDto.setLastBooking(lastNearBookingDto);
         });
-    return itemDto;
+        return new ItemWithBookingDto();
     }
 
     @Override
@@ -120,13 +122,21 @@ public class ItemServiceImpl implements ItemService {
         if (Objects.isNull(userId)) {
             throw new ItemWrongRequestException(USER_NOT_PROVIDED);
         }
-        User owner = userRepository.findById(userId).orElseThrow(
+        userRepository.findById(userId).orElseThrow(
                 () -> new UserNotFoundException(userId)
         );
-        Item itemModified = toItem(itemDto);
-        itemModified.setId(itemId);
-        itemModified.setOwner(owner);
-        return toItemDto(itemRepository.save(itemModified));
+        Item itemStored = itemRepository.findById(itemId).orElseThrow(() ->
+                new ItemNotFoundException(itemId));
+        if (Objects.nonNull(itemDto.getName())) {
+            itemStored.setName(itemDto.getName());
+        }
+        if (Objects.nonNull(itemDto.getDescription())) {
+            itemStored.setDescription(itemDto.getDescription());
+        }
+        if (Objects.nonNull(itemDto.getAvailable())) {
+            itemStored.setAvailable(itemDto.getAvailable());
+        }
+        return toItemDto(itemRepository.save(itemStored));
     }
 
     @Override

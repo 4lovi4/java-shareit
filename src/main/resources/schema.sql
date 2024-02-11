@@ -1,7 +1,9 @@
 create table if not exists users (
     id bigint generated always as identity primary key,
     name varchar(255),
-    email varchar(100) unique);
+    email varchar(100),
+    unique (email)
+    );
 
 create table if not exists requests(
     id bigint generated always as identity primary key,

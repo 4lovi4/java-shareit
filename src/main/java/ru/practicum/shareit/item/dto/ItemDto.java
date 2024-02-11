@@ -12,16 +12,16 @@ import javax.validation.constraints.NotNull;
 @Data
 @AllArgsConstructor
 @RequiredArgsConstructor
-@NoArgsConstructor(force = true)
+@NoArgsConstructor
 public class ItemDto {
     private Long id;
     @NonNull
     @NotBlank(message = "Поле name не должно быть пустым")
-    private final String name;
+    private String name;
     @NonNull
     @NotBlank(message = "Поле description не должно быть пустым")
-    private final String description;
+    private String description;
     @NonNull
     @NotNull(message = "Поле available не должно быть пустым")
-    private final Boolean available;
+    private Boolean available;
 }

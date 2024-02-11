@@ -46,7 +46,6 @@ public class Item {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "request_id")
     private ItemRequest request;
-    @NonNull
     @OneToMany(mappedBy = "item", fetch = FetchType.LAZY)
     private Set<Booking> bookings;
 

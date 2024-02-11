@@ -17,7 +17,6 @@ import javax.validation.constraints.Email;
 import javax.validation.constraints.NotEmpty;
 
 @Data
-@RequiredArgsConstructor
 @AllArgsConstructor
 @NoArgsConstructor(force = true)
 @Entity
@@ -33,6 +32,5 @@ public class User {
     @NotEmpty(message = "Поле email не может быть пустым")
     @Email(message = "email должен соответствовать паттерну name@domen.zone и содержать @")
     @Column(name = "email", nullable = false)
-    @NonNull
     private String email;
 }
