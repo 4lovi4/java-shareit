@@ -40,10 +40,10 @@ public class Item {
     @NotNull(message = "Поле available не должно быть пустым")
     @Column(name = "available", nullable = false)
     private Boolean available;
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(targetEntity = User.class, fetch = FetchType.LAZY)
     @JoinColumn(name = "owner_id")
     private User owner;
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(targetEntity = ItemRequest.class, fetch = FetchType.LAZY)
     @JoinColumn(name = "request_id")
     private ItemRequest request;
     @OneToMany(mappedBy = "item", fetch = FetchType.LAZY)

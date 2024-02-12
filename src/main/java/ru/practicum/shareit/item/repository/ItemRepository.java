@@ -13,6 +13,7 @@ import java.util.Optional;
 public interface ItemRepository extends JpaRepository<Item, Long> {
     List<Item> findByOwner(Long userId);
 
+    @Query("select it from Item it join fetch it.owner where it.id = :itemId and it.owner = :user")
     Optional<Item> findByIdAndOwner(Long itemId, User user);
 
     @Query("select it from Item it " +

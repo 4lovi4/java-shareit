@@ -90,6 +90,7 @@ public class ItemServiceImpl implements ItemService {
         Item item = itemRepository.findByIdAndOwner(itemId, owner)
                 .orElseThrow(() -> new ItemNotFoundException(itemId));
         LocalDateTime currentTime = LocalDateTime.now();
+        System.out.println(item.toString() + currentTime);
         Optional<Booking> nextBooking = bookingRepository.findFirstByItem_IdAndStartAfterOrderByStartAsc(item.getId(), currentTime);
         Optional<Booking> lastBooking = bookingRepository.findFirstByItem_IdAndStartBeforeOrderByStartDesc(item.getId(), currentTime);
         ItemWithBookingDto itemDto = toItemWithBookingDto(item);
