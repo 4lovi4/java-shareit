@@ -42,9 +42,6 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserDto addUser(UserDto userDto) {
         User user = UserMapper.toUser(userDto);
-//        if (userRepository.findByEmail(user.getEmail()).isPresent()) {
-//            throw new UserDuplicateException(user);
-//        }
         return toUserDto(userRepository.save(user));
     }
 
@@ -54,13 +51,10 @@ public class UserServiceImpl implements UserService {
                 new UserNotFoundException(userId)
         );
         User userUpdated = UserMapper.toUser(userDto);
-        String updateEmail = userDto.getEmail();
-        String updateName = userDto.getName();
+        String updateEmail = userUpdated.getEmail();
+        String updateName = userUpdated.getName();
 
         if (Objects.nonNull(updateEmail)) {
-//            if (userRepository.findByEmailAndIdNot(updateEmail, user.getId()).isPresent()) {
-//                throw new UserDuplicateException(user);
-//            }
             user.setEmail(updateEmail);
         }
         if (Objects.nonNull(updateName)) {

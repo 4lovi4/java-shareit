@@ -24,16 +24,6 @@ public class ItemMapper {
                 item.getAvailable()
         );
         itemBookingDto.setId(item.getId());
-        itemBookingDto.setLastBooking(BookingMapper
-                .toNearBooking(item
-                        .getBookings()
-                        .stream()
-                        .min(Comparator.comparing(Booking::getStart)).get()));
-        itemBookingDto.setNextBooking(BookingMapper
-                .toNearBooking(item
-                        .getBookings()
-                        .stream()
-                        .max(Comparator.comparing(Booking::getStart)).get()));
         return itemBookingDto;
     }
 
