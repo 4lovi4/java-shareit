@@ -84,10 +84,10 @@ public class ItemServiceImpl implements ItemService {
         if (Objects.isNull(userId)) {
             throw new ItemWrongRequestException(USER_NOT_PROVIDED);
         }
-        User owner = userRepository.findById(userId).orElseThrow(
+        userRepository.findById(userId).orElseThrow(
                 () -> new UserNotFoundException(userId)
         );
-        Item item = itemRepository.findByIdAndOwner(itemId, owner)
+        Item item = itemRepository.findById(itemId)
                 .orElseThrow(() -> new ItemNotFoundException(itemId));
         LocalDateTime currentTime = LocalDateTime.now();
         Optional<Booking> nextBooking = bookingRepository.findFirstByItem_IdAndStartAfterOrderByStartAsc(item.getId(), currentTime);
