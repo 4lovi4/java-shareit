@@ -50,7 +50,7 @@ public class BookingServiceImpl implements BookingService {
         Booking booking = BookingMapper.toBooking(bookingDto);
         validateBooking(booking);
         User booker = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException(userId));
-        Item item = itemRepository.findById(bookingDto.getItemId()).orElseThrow(
+        Item item = itemRepository.findByIdAndOwner_IdNot(bookingDto.getItemId(), userId).orElseThrow(
                 () -> new ItemNotFoundException(bookingDto.getItemId())
         );
         if (!item.getAvailable()) {
@@ -71,6 +71,7 @@ public class BookingServiceImpl implements BookingService {
                 .orElseThrow(() -> new UserNotFoundException(userId));
         Booking booking = bookingRepository.findById(bookingId).orElseThrow(() ->
                 new BookingNotFoundException(bookingId));
+
         if (!booking.getItem().getOwner().getId().equals(user.getId())) {
             throw new BookingWrongRequestException(String.format("Вещь id %d не принадлежит пользователю %d",
                     booking.getItem().getId(), user.getId()));

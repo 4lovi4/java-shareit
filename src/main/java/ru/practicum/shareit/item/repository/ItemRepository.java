@@ -24,4 +24,5 @@ public interface ItemRepository extends JpaRepository<Item, Long> {
             "and available is true " +
             "order by it.id asc")
     List<Item> findByNameOrDescriptionContainingIgnoreCase(@Param("text") String text);
+    Optional<Item> findByIdAndOwner_IdNot(Long itemId, Long ownerId);
 }
