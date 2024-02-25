@@ -2,9 +2,14 @@ package ru.practicum.shareit.booking.exception;
 
 public class BookingNotFoundException extends RuntimeException {
 
-    private static final String ERROR_MESSAGE = "Бронирование id = %d не найден";
+    private static final String ERROR_MESSAGE = "Бронирование id = %d не найдено";
 
     public BookingNotFoundException() {
+        super();
+    }
+
+    public BookingNotFoundException(String exceptionMessage) {
+        super(exceptionMessage);
     }
 
     public BookingNotFoundException(Long bookingId) {

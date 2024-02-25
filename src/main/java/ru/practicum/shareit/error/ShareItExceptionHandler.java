@@ -14,8 +14,11 @@ import org.springframework.web.bind.MissingRequestHeaderException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
-import ru.practicum.shareit.error.ErrorResponseModel;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import ru.practicum.shareit.booking.exception.BookingNotFoundException;
+import ru.practicum.shareit.booking.exception.BookingWrongRequestException;
 import ru.practicum.shareit.item.exception.ItemNotFoundException;
+import ru.practicum.shareit.item.exception.ItemUnavailableException;
 import ru.practicum.shareit.item.exception.ItemWrongRequestException;
 import ru.practicum.shareit.user.exception.UserDuplicateException;
 import ru.practicum.shareit.user.exception.UserNotFoundException;
@@ -34,7 +37,9 @@ public class ShareItExceptionHandler {
     private static final String VALIDATION_CODE = "PAYLOAD_NOT_VALID";
     private static final String ITEM_NOT_FOUND_CODE = "ITEM_NOT_FOUND";
     private static final String ITEM_WRONG_CODE = "ITEM_NOT_VALID";
+    private static final String ITEM_UNAVAILABLE_CODE = "ITEM_UNAVAILABLE";
     private static final String UNEXPECTED_ERROR_CODE = "UNEXPECTED_SERVER_ERROR";
+    private static final String BOOKING_NOT_FOUND_CODE = "BOOKING_NOT_FOUND";
     private final ObjectMapper objectMapper;
 
     @Autowired
@@ -62,6 +67,20 @@ public class ShareItExceptionHandler {
     ResponseEntity<String> handleWrongRequestError(HttpServletRequest request, Exception exception) {
         ErrorResponseModel error = new ErrorResponseModel(
                 ITEM_WRONG_CODE,
+                exception.getMessage(),
+                request.getRequestURL().toString()
+        );
+        HttpHeaders headers = new HttpHeaders();
+        headers.add(HEADER_KEY, HEADER_VALUE);
+        return new ResponseEntity<>(objectMapper.writeValueAsString(error), headers, HttpStatus.BAD_REQUEST);
+    }
+
+    @SneakyThrows
+    @ExceptionHandler(ItemUnavailableException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    ResponseEntity<String> handleUnavailableError(HttpServletRequest request, Exception exception) {
+        ErrorResponseModel error = new ErrorResponseModel(
+                ITEM_UNAVAILABLE_CODE,
                 exception.getMessage(),
                 request.getRequestURL().toString()
         );
@@ -128,6 +147,44 @@ public class ShareItExceptionHandler {
         HttpHeaders headers = new HttpHeaders();
         headers.add(HEADER_KEY, HEADER_VALUE);
         return new ResponseEntity<>(objectMapper.writeValueAsString(error), headers, HttpStatus.BAD_REQUEST);
+    }
+
+    @SneakyThrows
+    @ExceptionHandler({BookingWrongRequestException.class})
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    ResponseEntity<String> handleBookingValidation(HttpServletRequest request, RuntimeException exception) {
+        ErrorResponseModel error = new ErrorResponseModel(DATA_VIOLATION_ERROR_CODE, exception.getMessage(),
+                request.getRequestURL().toString());
+        HttpHeaders headers = new HttpHeaders();
+        headers.add(HEADER_KEY, HEADER_VALUE);
+        return new ResponseEntity<>(objectMapper.writeValueAsString(error), headers, HttpStatus.BAD_REQUEST);
+    }
+
+    @SneakyThrows
+    @ExceptionHandler({MethodArgumentTypeMismatchException.class})
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    ResponseEntity<String> handleBookingStateValidation(HttpServletRequest request, MethodArgumentTypeMismatchException exception) {
+        String[] exceptionMessageWords = exception.getMessage().split("\\.");
+        String valueName = exceptionMessageWords[exceptionMessageWords.length - 1];
+        ErrorResponseModel error = new ErrorResponseModel(DATA_VIOLATION_ERROR_CODE,
+                "Unknown state: " + valueName,
+                request.getRequestURL().toString());
+        HttpHeaders headers = new HttpHeaders();
+        headers.add(HEADER_KEY, HEADER_VALUE);
+        return new ResponseEntity<>(objectMapper.writeValueAsString(error), headers, HttpStatus.BAD_REQUEST);
+    }
+
+    @SneakyThrows
+    @ExceptionHandler({BookingNotFoundException.class})
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    ResponseEntity<String> handleBookingNotFound(HttpServletRequest request, Exception exception) {
+        ErrorResponseModel error = new ErrorResponseModel(
+                BOOKING_NOT_FOUND_CODE,
+                exception.getMessage(),
+                request.getRequestURL().toString());
+        HttpHeaders headers = new HttpHeaders();
+        headers.add(HEADER_KEY, HEADER_VALUE);
+        return new ResponseEntity<>(objectMapper.writeValueAsString(error), headers, HttpStatus.NOT_FOUND);
     }
 
     @SneakyThrows

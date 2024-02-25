@@ -28,7 +28,8 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "bookings", schema = "public")
-@Getter @Setter
+@Getter
+@Setter
 @ToString
 @AllArgsConstructor
 @NoArgsConstructor
@@ -37,18 +38,15 @@ public class Booking {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @NonNull
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "item_id")
     private Item item;
     @NonNull
     @NotNull(message = "поле start в Booking не должно быть пустым")
-    @Past(message = "Поле start в Booking должно быть в прошлом")
     @Column(name = "start_time")
     private LocalDateTime start;
     @NonNull
     @NotNull(message = "поле end в Booking не должно быть пустым")
-    @Future(message = "Поле end в Booking должно быть в будущем")
     @Column(name = "end_time")
     private LocalDateTime end;
     @ManyToOne(fetch = FetchType.LAZY)

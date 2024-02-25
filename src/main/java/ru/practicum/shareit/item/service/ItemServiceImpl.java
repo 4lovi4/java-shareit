@@ -22,6 +22,7 @@ import static ru.practicum.shareit.item.dto.ItemMapper.toItem;
 import static ru.practicum.shareit.item.dto.ItemMapper.toItemWithBookingDto;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashSet;
@@ -55,7 +56,11 @@ public class ItemServiceImpl implements ItemService {
         }
         LocalDateTime currentTime = LocalDateTime.now();
 
-        return itemRepository.findByOwner(userId)
+        User owner = userRepository.findById(userId).orElseThrow(
+                () -> new UserNotFoundException(userId)
+        );
+
+        return itemRepository.findByOwnerOrderByIdAsc(owner)
                 .stream().map(it ->
                 {
                     Set<Booking> itBookings = it.getBookings();
@@ -143,6 +148,9 @@ public class ItemServiceImpl implements ItemService {
     public List<ItemDto> findItemsByText(Long userId, String searchText) {
         if (Objects.isNull(userId)) {
             throw new ItemWrongRequestException(USER_NOT_PROVIDED);
+        }
+        if (searchText.isBlank()) {
+            return new ArrayList<>();
         }
         return itemRepository.findByNameOrDescriptionContainingIgnoreCase(searchText)
                 .stream()
