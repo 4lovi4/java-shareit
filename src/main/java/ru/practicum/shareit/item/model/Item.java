@@ -2,8 +2,8 @@ package ru.practicum.shareit.item.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode.Exclude;
 import lombok.NoArgsConstructor;
-import lombok.NonNull;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.request.model.ItemRequest;
 import ru.practicum.shareit.user.model.User;
@@ -40,12 +40,15 @@ public class Item {
     @NotNull(message = "Поле available не должно быть пустым")
     @Column(name = "available", nullable = false)
     private Boolean available;
+    @Exclude
     @ManyToOne(targetEntity = User.class, fetch = FetchType.LAZY)
     @JoinColumn(name = "owner_id")
     private User owner;
+    @Exclude
     @ManyToOne(targetEntity = ItemRequest.class, fetch = FetchType.LAZY)
     @JoinColumn(name = "request_id")
     private ItemRequest request;
+    @Exclude
     @OneToMany(mappedBy = "item", fetch = FetchType.LAZY)
     private Set<Booking> bookings;
 
@@ -53,5 +56,18 @@ public class Item {
         this.name = name;
         this.description = description;
         this.available = available;
+    }
+
+    @Override
+    public String toString() {
+        return "Item{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", description='" + description + '\'' +
+                ", available=" + available +
+                ", owner_id=" + owner.getId() +
+                ", request=" + request.getId() +
+                ", bookings=" + bookings.size() +
+                '}';
     }
 }

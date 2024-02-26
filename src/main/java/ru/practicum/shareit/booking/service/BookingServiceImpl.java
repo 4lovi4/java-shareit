@@ -1,5 +1,6 @@
 package ru.practicum.shareit.booking.service;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.dto.BookingResponse;
@@ -30,6 +31,7 @@ import java.util.stream.Collectors;
 import static ru.practicum.shareit.item.service.ItemServiceImpl.USER_NOT_PROVIDED;
 
 @Service
+@Slf4j
 public class BookingServiceImpl implements BookingService {
     private BookingRepository bookingRepository;
     private UserRepository userRepository;
@@ -71,7 +73,11 @@ public class BookingServiceImpl implements BookingService {
                 .orElseThrow(() -> new UserNotFoundException(userId));
         Booking booking = bookingRepository.findById(bookingId).orElseThrow(() ->
                 new BookingNotFoundException(bookingId));
-
+        if (!booking.getItem().getOwner().getId().equals(user.getId()) &&
+        booking.getBooker().getId().equals(user.getId())) {
+            throw new BookingNotFoundException(String.format("Вещь id %d не принадлежит пользователю %d, это хозяин брони",
+                    booking.getItem().getId(), user.getId()));
+        }
         if (!booking.getItem().getOwner().getId().equals(user.getId())) {
             throw new BookingWrongRequestException(String.format("Вещь id %d не принадлежит пользователю %d",
                     booking.getItem().getId(), user.getId()));
@@ -96,7 +102,7 @@ public class BookingServiceImpl implements BookingService {
                 () -> new BookingNotFoundException(bookingId));
         if (!(userId.equals(booking.getBooker().getId()) ||
                 userId.equals(booking.getItem().getOwner().getId()))) {
-            throw new BookingNotFoundException(String.format("Бронирование %d не совершалось пользователем id %d " +
+            throw new BookingNotFoundException(String.format("Бронирование %d не сов    ершалось пользователем id %d " +
                     "и вещь id %d не принадлежит ему", bookingId, userId, booking.getItem().getOwner().getId()));
         }
         return BookingMapper.toBookingResponse(booking);

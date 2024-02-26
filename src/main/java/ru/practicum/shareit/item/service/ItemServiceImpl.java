@@ -1,7 +1,9 @@
 package ru.practicum.shareit.item.service;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import ru.practicum.shareit.booking.dto.BookingMapper;
 import ru.practicum.shareit.booking.dto.NearBookingDto;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.repository.BookingRepository;
@@ -23,9 +25,7 @@ import static ru.practicum.shareit.item.dto.ItemMapper.toItemWithBookingDto;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Comparator;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -33,6 +33,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
+@Slf4j
 public class ItemServiceImpl implements ItemService {
 
     private ItemRepository itemRepository;
@@ -55,17 +56,16 @@ public class ItemServiceImpl implements ItemService {
             throw new ItemWrongRequestException(USER_NOT_PROVIDED);
         }
         LocalDateTime currentTime = LocalDateTime.now();
-
         User owner = userRepository.findById(userId).orElseThrow(
                 () -> new UserNotFoundException(userId)
         );
-
         return itemRepository.findByOwnerOrderByIdAsc(owner)
                 .stream().map(it ->
                 {
+                    ItemWithBookingDto itWithBooking = ItemMapper.toItemWithBookingDto(it);
                     Set<Booking> itBookings = it.getBookings();
                     if (itBookings.isEmpty()) {
-                        return it;
+                        return itWithBooking;
                     }
                     Booking lastBooking = itBookings.stream()
                             .filter(itBooking -> itBooking.getStart().isBefore(currentTime))
@@ -75,12 +75,18 @@ public class ItemServiceImpl implements ItemService {
                             .filter(itBooking -> itBooking.getStart().isAfter(currentTime))
                             .min(Comparator.comparing(Booking::getStart))
                             .orElse(null);
-                    if (!Objects.isNull(lastBooking) && !Objects.isNull(nextBooking)) {
-                        it.setBookings(new HashSet<>(Arrays.asList(lastBooking, nextBooking)));
+                    NearBookingDto lastNearBooking = null;
+                    if (lastBooking != null) {
+                        lastNearBooking = BookingMapper.toNearBooking(lastBooking);
                     }
-                    return it;
+                    itWithBooking.setLastBooking(lastNearBooking);
+                    NearBookingDto nextNearBooking = null;
+                    if (nextBooking != null) {
+                        nextNearBooking = BookingMapper.toNearBooking(nextBooking);
+                    }
+                    itWithBooking.setNextBooking(nextNearBooking);
+                    return itWithBooking;
                 })
-                .map(ItemMapper::toItemWithBookingDto)
                 .collect(Collectors.toList());
     }
 
@@ -89,14 +95,16 @@ public class ItemServiceImpl implements ItemService {
         if (Objects.isNull(userId)) {
             throw new ItemWrongRequestException(USER_NOT_PROVIDED);
         }
-        userRepository.findById(userId).orElseThrow(
+        User user = userRepository.findById(userId).orElseThrow(
                 () -> new UserNotFoundException(userId)
         );
         Item item = itemRepository.findById(itemId)
                 .orElseThrow(() -> new ItemNotFoundException(itemId));
         LocalDateTime currentTime = LocalDateTime.now();
-        Optional<Booking> nextBooking = bookingRepository.findFirstByItem_IdAndStartAfterOrderByStartAsc(item.getId(), currentTime);
-        Optional<Booking> lastBooking = bookingRepository.findFirstByItem_IdAndStartBeforeOrderByStartDesc(item.getId(), currentTime);
+        Optional<Booking> nextBooking = bookingRepository
+                .findFirstByItem_IdAndItem_Owner_IdAndStartAfterOrderByStartAsc(item.getId(), user.getId(), currentTime);
+        Optional<Booking> lastBooking = bookingRepository
+                .findFirstByItem_IdAndItem_Owner_IdAndStartBeforeOrderByStartDesc(item.getId(), user.getId(), currentTime);
         ItemWithBookingDto itemDto = toItemWithBookingDto(item);
         nextBooking.ifPresent(booking -> {
             NearBookingDto nextNearBookingDto = toNearBooking(booking);

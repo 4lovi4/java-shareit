@@ -1,6 +1,7 @@
 package ru.practicum.shareit.booking.model;
 
 import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode.Exclude;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
@@ -49,10 +50,23 @@ public class Booking {
     @NotNull(message = "поле end в Booking не должно быть пустым")
     @Column(name = "end_time")
     private LocalDateTime end;
+    @Exclude
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "booker_id")
     private User booker;
     @Enumerated(EnumType.STRING)
     @Column(name = "status")
     private BookingStatus status;
+
+    @Override
+    public String toString() {
+        return "Booking{" +
+                "id=" + id +
+                ", item_id=" + item.getId() +
+                ", start=" + start +
+                ", end=" + end +
+                ", booker_id=" + booker.getId() +
+                ", status=" + status +
+                '}';
+    }
 }
