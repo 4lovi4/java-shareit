@@ -51,6 +51,9 @@ public class Item {
     @Exclude
     @OneToMany(mappedBy = "item", fetch = FetchType.LAZY)
     private Set<Booking> bookings;
+    @Exclude
+    @OneToMany(mappedBy = "item", fetch = FetchType.LAZY)
+    private Set<Comment> comments;
 
     public Item(String name, String description, Boolean available) {
         this.name = name;
