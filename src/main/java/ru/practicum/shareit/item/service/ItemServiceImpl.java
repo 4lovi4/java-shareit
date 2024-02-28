@@ -8,12 +8,15 @@ import ru.practicum.shareit.booking.dto.NearBookingDto;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.item.dto.CommentDto;
+import ru.practicum.shareit.item.dto.CommentMapper;
 import ru.practicum.shareit.item.dto.ItemWithBookingDto;
 import ru.practicum.shareit.item.exception.ItemNotFoundException;
+import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.ItemMapper;
 import ru.practicum.shareit.item.exception.ItemWrongRequestException;
+import ru.practicum.shareit.item.repository.CommentRepository;
 import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.exception.UserNotFoundException;
@@ -40,15 +43,18 @@ public class ItemServiceImpl implements ItemService {
     private ItemRepository itemRepository;
     private UserRepository userRepository;
     private BookingRepository bookingRepository;
+    private CommentRepository commentRepository;
     public static final String USER_NOT_PROVIDED = "Не передан id пользователя";
 
     @Autowired
     public ItemServiceImpl(ItemRepository itemRepository,
                            UserRepository userRepository,
-                           BookingRepository bookingRepository) {
+                           BookingRepository bookingRepository,
+                           CommentRepository commentRepository) {
         this.itemRepository = itemRepository;
         this.userRepository = userRepository;
         this.bookingRepository = bookingRepository;
+        this.commentRepository = commentRepository;
     }
 
     @Override
@@ -86,6 +92,16 @@ public class ItemServiceImpl implements ItemService {
                         nextNearBooking = BookingMapper.toNearBooking(nextBooking);
                     }
                     itWithBooking.setNextBooking(nextNearBooking);
+                    List<Comment> itComments = new ArrayList<>(it.getComments());
+                    itComments.sort(Comparator.comparing(Comment::getId));
+                    itWithBooking.setComments(itComments.stream()
+                            .map(comment -> {
+                                CommentDto commentDto = CommentMapper.toCommentDto(comment);
+                                commentDto.setAuthorName(comment.getUser().getName());
+                                return commentDto;
+                            })
+                            .sorted(Comparator.comparing(CommentDto::getId))
+                            .collect(Collectors.toList()));
                     return itWithBooking;
                 })
                 .collect(Collectors.toList());
@@ -115,6 +131,17 @@ public class ItemServiceImpl implements ItemService {
             NearBookingDto lastNearBookingDto = toNearBooking(booking);
             itemDto.setLastBooking(lastNearBookingDto);
         });
+
+        List<Comment> itemComments = new ArrayList<>(item.getComments());
+        itemComments.sort(Comparator.comparing(Comment::getId));
+        itemDto.setComments(itemComments.stream()
+                .map(comment -> {
+                    CommentDto commentDto = CommentMapper.toCommentDto(comment);
+                    commentDto.setAuthorName(comment.getUser().getName());
+                    return commentDto;
+                })
+                .sorted(Comparator.comparing(CommentDto::getId))
+                .collect(Collectors.toList()));
         return itemDto;
     }
 
@@ -136,9 +163,9 @@ public class ItemServiceImpl implements ItemService {
         if (Objects.isNull(userId)) {
             throw new ItemWrongRequestException(USER_NOT_PROVIDED);
         }
-        userRepository.findById(userId).orElseThrow(
-                () -> new UserNotFoundException(userId)
-        );
+        if (userRepository.findById(userId).isEmpty()) {
+            throw new UserNotFoundException(userId);
+        }
         Item itemStored = itemRepository.findById(itemId).orElseThrow(() ->
                 new ItemNotFoundException(itemId));
         if (Objects.nonNull(itemDto.getName())) {
@@ -168,7 +195,27 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public CommentDto addCommentForItem(Long userId, Long itemId, CommentDto comment) {
-        return new CommentDto();
+    public CommentDto addCommentForItem(Long userId, Long itemId, CommentDto commentDto) {
+        if (Objects.isNull(userId)) {
+            throw new ItemWrongRequestException(USER_NOT_PROVIDED);
+        }
+        User user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException(userId));
+        Item item = itemRepository.findById(itemId).orElseThrow(() -> new ItemNotFoundException(itemId));
+        LocalDateTime currentTime = LocalDateTime.now();
+        if (bookingRepository.findAllByItem_Id(itemId)
+                .stream()
+                .anyMatch(b -> b.getBooker().getId().equals(userId) &&
+                        b.getEnd().isBefore(currentTime))) {
+            throw new ItemWrongRequestException(
+                    String.format("У пользователя id %d нет законченных бронирований вещи id %d.",
+                            userId, itemId));
+        }
+        Comment comment = CommentMapper.toComment(commentDto);
+        comment.setUser(user);
+        comment.setItem(item);
+        comment.setCreatedTime(currentTime);
+        CommentDto commentDtoResponse = CommentMapper.toCommentDto(commentRepository.saveAndFlush(comment));
+        commentDtoResponse.setAuthorName(user.getName());
+        return commentDtoResponse;
     }
 }
