@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 @Data
 @AllArgsConstructor
 public class NearBookingDto {
-    Long Id;
+    Long id;
     Long bookerId;
     LocalDateTime start;
     LocalDateTime end;

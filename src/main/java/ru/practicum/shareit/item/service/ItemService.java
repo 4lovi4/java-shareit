@@ -6,7 +6,7 @@ import ru.practicum.shareit.item.dto.ItemWithBookingDto;
 
 import java.util.List;
 
-public interface ItemService {
+public interface    ItemService {
     List<ItemWithBookingDto> findAllItemsForUser(Long userId);
 
     ItemDto findItemById(Long userId, Long itemId);
@@ -16,5 +16,6 @@ public interface ItemService {
     ItemDto updateItem(Long userId, Long itemId, ItemDto item);
 
     List<ItemDto> findItemsByText(Long userId, String text);
+
     CommentDto addCommentForItem(Long userId, Long itemId, CommentDto comment);
 }

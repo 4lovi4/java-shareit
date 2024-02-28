@@ -68,8 +68,7 @@ public class ItemServiceImpl implements ItemService {
                 () -> new UserNotFoundException(userId)
         );
         return itemRepository.findByOwnerOrderByIdAsc(owner)
-                .stream().map(it ->
-                {
+                .stream().map(it -> {
                     ItemWithBookingDto itWithBooking = ItemMapper.toItemWithBookingDto(it);
                     Set<Booking> itBookings = it.getBookings();
                     if (itBookings.isEmpty()) {
