@@ -1,10 +1,6 @@
 package ru.practicum.shareit.item.dto;
 
-import ru.practicum.shareit.booking.dto.BookingMapper;
-import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.item.model.Item;
-
-import java.util.Comparator;
 
 public class ItemMapper {
     public static ItemDto toItemDto(Item item) {

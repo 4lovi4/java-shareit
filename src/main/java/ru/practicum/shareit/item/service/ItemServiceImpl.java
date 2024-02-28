@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.dto.BookingMapper;
 import ru.practicum.shareit.booking.dto.NearBookingDto;
 import ru.practicum.shareit.booking.model.Booking;
+import ru.practicum.shareit.booking.model.BookingStatus;
 import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.CommentMapper;
@@ -119,9 +120,15 @@ public class ItemServiceImpl implements ItemService {
                 .orElseThrow(() -> new ItemNotFoundException(itemId));
         LocalDateTime currentTime = LocalDateTime.now();
         Optional<Booking> nextBooking = bookingRepository
-                .findFirstByItem_IdAndItem_Owner_IdAndStartAfterOrderByStartAsc(item.getId(), user.getId(), currentTime);
+                .findFirstByItem_IdAndItem_Owner_IdAndStatusNotAndStartAfterOrderByStartAsc(item.getId(),
+                        user.getId(),
+                        BookingStatus.REJECTED,
+                        currentTime);
         Optional<Booking> lastBooking = bookingRepository
-                .findFirstByItem_IdAndItem_Owner_IdAndStartBeforeOrderByStartDesc(item.getId(), user.getId(), currentTime);
+                .findFirstByItem_IdAndItem_Owner_IdAndStatusNotAndStartBeforeOrderByStartDesc(item.getId(),
+                        user.getId(),
+                        BookingStatus.REJECTED,
+                        currentTime);
         ItemWithBookingDto itemDto = toItemWithBookingDto(item);
         nextBooking.ifPresent(booking -> {
             NearBookingDto nextNearBookingDto = toNearBooking(booking);
@@ -204,8 +211,10 @@ public class ItemServiceImpl implements ItemService {
         LocalDateTime currentTime = LocalDateTime.now();
         if (bookingRepository.findAllByItem_Id(itemId)
                 .stream()
-                .anyMatch(b -> b.getBooker().getId().equals(userId) &&
-                        b.getEnd().isBefore(currentTime))) {
+                .noneMatch(b -> b.getBooker().getId().equals(userId) &&
+                        b.getEnd().isBefore(currentTime) &&
+                        b.getStatus().equals(BookingStatus.APPROVED))
+        ) {
             throw new ItemWrongRequestException(
                     String.format("У пользователя id %d нет законченных бронирований вещи id %d.",
                             userId, itemId));

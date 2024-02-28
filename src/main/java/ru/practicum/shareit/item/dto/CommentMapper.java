@@ -13,7 +13,7 @@ public class CommentMapper {
 
     public static Comment toComment(CommentDto commentDto) {
         Comment comment = new Comment();
-        comment.setText(comment.getText());
+        comment.setText(commentDto.getText());
         return comment;
     }
 }

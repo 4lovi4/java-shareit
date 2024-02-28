@@ -16,7 +16,6 @@ import ru.practicum.shareit.item.dto.ItemWithBookingDto;
 import ru.practicum.shareit.item.service.ItemService;
 
 import javax.validation.Valid;
-import javax.websocket.server.PathParam;
 import java.util.List;
 
 @RestController("itemRestController")
@@ -62,7 +61,7 @@ public class ItemController {
     @PostMapping("/{id}/comment")
     public CommentDto postCommentForItem(@RequestHeader("X-Sharer-User-Id") Long userId,
         @PathVariable("id") Long itemId,
-        @RequestBody CommentDto comment) {
+        @Valid @RequestBody CommentDto comment) {
         return itemService.addCommentForItem(userId, itemId, comment);
     }
 
