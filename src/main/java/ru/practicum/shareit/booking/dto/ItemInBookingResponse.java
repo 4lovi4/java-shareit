@@ -10,6 +10,6 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ItemInBookingResponse {
-    Long id;
-    String name;
+    private Long id;
+    private String name;
 }

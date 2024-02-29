@@ -15,10 +15,10 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Builder
 public class BookingResponse {
-    Long id;
-    LocalDateTime start;
-    LocalDateTime end;
-    BookingStatus status;
-    BookerInBookingResponse booker;
-    ItemInBookingResponse item;
+    private Long id;
+    private LocalDateTime start;
+    private LocalDateTime end;
+    private BookingStatus status;
+    private BookerInBookingResponse booker;
+    private ItemInBookingResponse item;
 }

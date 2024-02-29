@@ -1,6 +1,7 @@
 package ru.practicum.shareit.item.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -20,6 +21,7 @@ import java.util.List;
 
 @RestController("itemRestController")
 @RequestMapping("/items")
+@Validated
 public class ItemController {
     private ItemService itemService;
 
