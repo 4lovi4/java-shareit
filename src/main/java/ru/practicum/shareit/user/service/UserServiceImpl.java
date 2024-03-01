@@ -2,12 +2,14 @@ package ru.practicum.shareit.user.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import ru.practicum.shareit.user.User;
+import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.dto.UserMapper;
+import ru.practicum.shareit.user.exception.UserNotFoundException;
 import ru.practicum.shareit.user.repository.UserRepository;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static ru.practicum.shareit.user.dto.UserMapper.toUserDto;
@@ -24,7 +26,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public List<UserDto> getAllUsers() {
-        return userRepository.findAllUsers()
+        return userRepository.findAll()
                 .stream()
                 .map(UserMapper::toUserDto)
                 .collect(Collectors.toList());
@@ -32,21 +34,36 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDto getUserById(Long userId) {
-        return toUserDto(userRepository.findUserById(userId));
+        return toUserDto(userRepository.findById(userId).orElseThrow(() ->
+                new UserNotFoundException(userId)));
     }
 
     @Override
-    public UserDto addUser(User user) {
-        return toUserDto(userRepository.createUser(user));
+    public UserDto addUser(UserDto userDto) {
+        User user = UserMapper.toUser(userDto);
+        return toUserDto(userRepository.save(user));
     }
 
     @Override
-    public UserDto updateUser(Long userId, User user) {
-        return toUserDto(userRepository.updateUser(userId, user));
+    public UserDto updateUser(Long userId, UserDto userDto) {
+        User user = userRepository.findById(userId).orElseThrow(() ->
+                new UserNotFoundException(userId)
+        );
+        User userUpdated = UserMapper.toUser(userDto);
+        String updateEmail = userUpdated.getEmail();
+        String updateName = userUpdated.getName();
+
+        if (Objects.nonNull(updateEmail)) {
+            user.setEmail(updateEmail);
+        }
+        if (Objects.nonNull(updateName)) {
+            user.setName(updateName);
+        }
+        return toUserDto(userRepository.save(user));
     }
 
     @Override
     public void deleteUser(Long userId) {
-        userRepository.deleteUser(userId);
+        userRepository.deleteById(userId);
     }
 }
