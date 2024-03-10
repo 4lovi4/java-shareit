@@ -10,6 +10,7 @@ public class ItemMapper {
                 item.getAvailable()
         );
         itemDto.setId(item.getId());
+        itemDto.setRequestId(item.getRequest().getId());
         return itemDto;
     }
 
@@ -23,9 +24,9 @@ public class ItemMapper {
         return itemBookingDto;
     }
 
-    public static Item toItem(ItemDto item) {
-        return new Item(item.getName(),
-                item.getDescription(),
-                item.getAvailable());
+    public static Item toItem(ItemDto itemDto) {
+        return new Item(itemDto.getName(),
+                itemDto.getDescription(),
+                itemDto.getAvailable());
     }
 }

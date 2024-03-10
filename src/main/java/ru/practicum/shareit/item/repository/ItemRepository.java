@@ -13,17 +13,15 @@ import java.util.Optional;
 public interface ItemRepository extends JpaRepository<Item, Long> {
     List<Item> findByOwnerOrderByIdAsc(User user);
 
-    List<Item> findByOwnerAndAvailableTrue(User user);
-
-    @Query("select it from Item it join fetch it.owner where it.id = :itemId and it.owner = :user")
-    Optional<Item> findByIdAndOwner(Long itemId, User user);
-
-    @Query("select it from Item it " +
-            "where (lower(it.name) like lower(concat('%', :text, '%')) " +
-            "or lower(it.description) like lower(concat('%', :text, '%'))) " +
-            "and available is true " +
-            "order by it.id asc")
+    @Query("SELECT it FROM Item it " +
+            "WHERE (lower(it.name) LIKE LOWER(concat('%', :text, '%')) " +
+            "or lower(it.description) LIKE LOWER(concat('%', :text, '%'))) " +
+            "AND available is true " +
+            "ORDER BY it.id asc")
     List<Item> findByNameOrDescriptionContainingIgnoreCase(@Param("text") String text);
 
     Optional<Item> findByIdAndOwner_IdNot(Long itemId, Long ownerId);
+
+    @Query("SELECT it FROM Item it WHERE it.request.id in (:requestsId) ORDER BY it.id ASC")
+    List<Item> findAllByRequest_IdIn(List<Long> requestsId);
 }

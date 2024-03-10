@@ -19,6 +19,8 @@ import ru.practicum.shareit.item.dto.ItemMapper;
 import ru.practicum.shareit.item.exception.ItemWrongRequestException;
 import ru.practicum.shareit.item.repository.CommentRepository;
 import ru.practicum.shareit.item.repository.ItemRepository;
+import ru.practicum.shareit.request.repository.ItemRequestRepository;
+import ru.practicum.shareit.request.service.ItemRequestService;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.exception.UserNotFoundException;
 import ru.practicum.shareit.user.repository.UserRepository;
@@ -45,17 +47,20 @@ public class ItemServiceImpl implements ItemService {
     private UserRepository userRepository;
     private BookingRepository bookingRepository;
     private CommentRepository commentRepository;
+    private ItemRequestRepository itemRequestRepository;
     public static final String USER_NOT_PROVIDED = "Не передан id пользователя";
 
     @Autowired
     public ItemServiceImpl(ItemRepository itemRepository,
                            UserRepository userRepository,
                            BookingRepository bookingRepository,
-                           CommentRepository commentRepository) {
+                           CommentRepository commentRepository,
+                           ItemRequestRepository itemRequestRepository) {
         this.itemRepository = itemRepository;
         this.userRepository = userRepository;
         this.bookingRepository = bookingRepository;
         this.commentRepository = commentRepository;
+        this.itemRequestRepository = itemRequestRepository;
     }
 
     @Override
@@ -161,7 +166,12 @@ public class ItemServiceImpl implements ItemService {
         );
         Item newItem = toItem(itemDto);
         newItem.setOwner(owner);
-        return toItemDto(itemRepository.save(newItem));
+        if (Objects.nonNull(itemDto.getRequestId())) {
+            itemRequestRepository
+                    .findById(itemDto.getRequestId())
+                    .ifPresent(newItem::setRequest);
+        }
+        return toItemDto(itemRepository.saveAndFlush(newItem));
     }
 
     @Override

@@ -20,10 +20,12 @@ import ru.practicum.shareit.booking.exception.BookingWrongRequestException;
 import ru.practicum.shareit.item.exception.ItemNotFoundException;
 import ru.practicum.shareit.item.exception.ItemUnavailableException;
 import ru.practicum.shareit.item.exception.ItemWrongRequestException;
+import ru.practicum.shareit.request.exception.RequestNotFoundException;
 import ru.practicum.shareit.user.exception.UserDuplicateException;
 import ru.practicum.shareit.user.exception.UserNotFoundException;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.validation.ConstraintViolationException;
 
 @ControllerAdvice
 @Slf4j
@@ -49,7 +51,7 @@ public class ShareItExceptionHandler {
 
 
     @SneakyThrows
-    @ExceptionHandler({ItemNotFoundException.class})
+    @ExceptionHandler({ItemNotFoundException.class, RequestNotFoundException.class})
     @ResponseStatus(HttpStatus.NOT_FOUND)
     ResponseEntity<String> handleItemNotFound(HttpServletRequest request, Exception exception) {
         ErrorResponseModel error = new ErrorResponseModel(
@@ -104,6 +106,17 @@ public class ShareItExceptionHandler {
     @ExceptionHandler({MissingRequestHeaderException.class})
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     ResponseEntity<String> handleHeaderNotProvided(HttpServletRequest request, MissingRequestHeaderException exception) {
+        ErrorResponseModel error = new ErrorResponseModel(DATA_VIOLATION_ERROR_CODE, exception.getMessage(),
+                request.getRequestURL().toString());
+        HttpHeaders headers = new HttpHeaders();
+        headers.add(HEADER_KEY, HEADER_VALUE);
+        return new ResponseEntity<>(objectMapper.writeValueAsString(error), headers, HttpStatus.BAD_REQUEST);
+    }
+
+    @SneakyThrows
+    @ExceptionHandler({ConstraintViolationException.class})
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    ResponseEntity<String> handleNotValidParams(HttpServletRequest request, ConstraintViolationException exception) {
         ErrorResponseModel error = new ErrorResponseModel(DATA_VIOLATION_ERROR_CODE, exception.getMessage(),
                 request.getRequestURL().toString());
         HttpHeaders headers = new HttpHeaders();
@@ -196,6 +209,7 @@ public class ShareItExceptionHandler {
                 exception.getMessage(),
                 request.getRequestURL().toString()
         );
+        log.debug("Exception Unknown Class: {}", exception.getClass());
         HttpHeaders headers = new HttpHeaders();
         headers.add(HEADER_KEY, HEADER_VALUE);
         return new ResponseEntity<>(objectMapper.writeValueAsString(error), headers, HttpStatus.INTERNAL_SERVER_ERROR);

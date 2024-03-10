@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode.Exclude;
 import lombok.NoArgsConstructor;
 import ru.practicum.shareit.item.model.Comment;
+import ru.practicum.shareit.request.model.ItemRequest;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -38,4 +39,7 @@ public class User {
     @Exclude
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
     private Set<Comment> comments;
+    @Exclude
+    @OneToMany(mappedBy = "requester", fetch = FetchType.LAZY)
+    private Set<ItemRequest> requests;
 }

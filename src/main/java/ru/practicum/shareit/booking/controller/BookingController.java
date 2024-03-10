@@ -17,6 +17,7 @@ import ru.practicum.shareit.booking.dto.BookingResponse;
 import ru.practicum.shareit.booking.service.BookingService;
 
 import javax.validation.Valid;
+import javax.validation.constraints.Min;
 import java.util.List;
 
 @RestController("bookingRestController")
@@ -39,29 +40,36 @@ public class BookingController {
 
     @PatchMapping("/{booking_id}")
     public BookingResponse changeBookingStatus(@RequestHeader("X-Sharer-User-Id") Long userId,
-                                          @PathVariable(name = "booking_id") Long bookingId,
-                                          @RequestParam(name = "approved", defaultValue = "true") Boolean approved) {
+                                               @PathVariable(name = "booking_id") Long bookingId,
+                                               @RequestParam(name = "approved", defaultValue = "true") Boolean approved) {
         return bookingService.changeBookingStatus(bookingId, userId, approved);
     }
 
     @GetMapping("/{booking_id}")
     public BookingResponse getBookingInfo(@RequestHeader("X-Sharer-User-Id") Long userId,
-                                     @PathVariable(name = "booking_id") Long bookingId) {
+                                          @PathVariable(name = "booking_id") Long bookingId) {
         return bookingService.getBookingById(bookingId, userId);
     }
 
     @GetMapping
     public List<BookingResponse> getAllBookingsToCurrentUser(@RequestHeader("X-Sharer-User-Id") Long userId,
-                                                 @RequestParam(name = "state", required = false, defaultValue = "ALL")
-                                                 BookingDtoState state) {
-
+                                                             @RequestParam(name = "state", required = false, defaultValue = "ALL")
+                                                             BookingDtoState state,
+                                                             @Valid @Min(value = 0, message = "from должен быть больше или равен 0")
+                                                             @RequestParam(name = "from", defaultValue = "0") Integer fromIndex,
+                                                             @Valid @Min(value = 1, message = "size не должен быть меньше 1")
+                                                             @RequestParam(defaultValue = "1") Integer size) {
         return bookingService.getAllBookingsByBookerAndState(userId, state);
     }
 
     @GetMapping("/owner")
     public List<BookingResponse> getAllBookingsByOwnerItem(@RequestHeader("X-Sharer-User-Id") Long userId,
-                                                      @RequestParam(name = "state", required = false, defaultValue = "ALL")
-                                                      BookingDtoState state) {
+                                                           @RequestParam(name = "state", required = false, defaultValue = "ALL")
+                                                           BookingDtoState state,
+                                                           @Valid @Min(value = 0, message = "from должен быть больше или равен 0")
+                                                           @RequestParam(name = "from", defaultValue = "0") Integer fromIndex,
+                                                           @Valid @Min(value = 1, message = "size не должен быть меньше 1")
+                                                           @RequestParam(defaultValue = "1") Integer size) {
         return bookingService.getAllBookingsByOwnerAndState(userId, state);
     }
 }
