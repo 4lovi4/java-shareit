@@ -59,7 +59,7 @@ public class BookingController {
                                                              @RequestParam(name = "from", defaultValue = "0") Integer fromIndex,
                                                              @Valid @Min(value = 1, message = "size не должен быть меньше 1")
                                                              @RequestParam(defaultValue = "1") Integer size) {
-        return bookingService.getAllBookingsByBookerAndState(userId, state);
+        return bookingService.getAllBookingsByBookerAndState(userId, state, fromIndex, size).getContent();
     }
 
     @GetMapping("/owner")
@@ -70,6 +70,6 @@ public class BookingController {
                                                            @RequestParam(name = "from", defaultValue = "0") Integer fromIndex,
                                                            @Valid @Min(value = 1, message = "size не должен быть меньше 1")
                                                            @RequestParam(defaultValue = "1") Integer size) {
-        return bookingService.getAllBookingsByOwnerAndState(userId, state);
+        return bookingService.getAllBookingsByOwnerAndState(userId, state, fromIndex, size).getContent();
     }
 }
