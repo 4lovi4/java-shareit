@@ -164,7 +164,7 @@ class ItemRequestServiceImplTest {
         List<ItemRequestDto> allRequestsResponse = requestService.getAllRequests(user.getId());
         log.info("expectedResponseRequests: {}", expectedResponseRequests.get(0));
         log.info("allRequestsResponse: {}", allRequestsResponse.get(0));
-        assertThat(allRequestsResponse, contains(expectedResponseRequests));
+        assertThat(allRequestsResponse, contains(expectedResponseRequests.toArray()));
     }
 
     @Test
