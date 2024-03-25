@@ -10,7 +10,7 @@ public interface ItemRequestService {
 
     List<ItemRequestDto> getAllRequests(Long userId);
 
-    Page<ItemRequestDto> getAllRequests(Long userId, Integer fromIndex, Integer size);
+    Page<ItemRequestDto> getAllRequestsPageable(Long userId, Integer fromIndex, Integer size);
 
     ItemRequestDto getRequestById(Long userId, Long requestId);
 }

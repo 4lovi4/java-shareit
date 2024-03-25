@@ -86,7 +86,7 @@ public class ItemRequestServiceImpl implements ItemRequestService {
     }
 
     @Override
-    public Page<ItemRequestDto> getAllRequests(Long userId, Integer fromIndex, Integer size) {
+    public Page<ItemRequestDto> getAllRequestsPageable(Long userId, Integer fromIndex, Integer size) {
         if (userRepository.findById(userId).isEmpty()) {
             throw new UserNotFoundException(userId);
         }
