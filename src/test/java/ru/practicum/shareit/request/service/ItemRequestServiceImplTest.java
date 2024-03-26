@@ -138,7 +138,7 @@ class ItemRequestServiceImplTest {
                 .name("вещь 2")
                 .description("описание 2")
                 .available(true)
-                .request(requestOne)
+                .request(requestTwo)
                 .owner(owner)
                 .build();
         ItemRequestDto requestDtoOne = ItemRequestDto.builder()
@@ -155,22 +155,22 @@ class ItemRequestServiceImplTest {
                         .build()))
                 .build();
         ItemRequestDto requestDtoTwo = ItemRequestDto.builder()
-                .id(requestOne.getId())
+                .id(requestTwo.getId())
                 .created(requestTwo.getCreated())
                 .requester(requester.getId())
                 .description(requestTwo.getDescription())
                 .items(List.of(ItemResponse.builder()
-                        .id(itemOne.getId())
-                        .name(itemOne.getName())
-                        .description(itemOne.getDescription())
-                        .available(itemOne.getAvailable())
-                        .requestId(requestOne.getId())
+                        .id(itemTwo.getId())
+                        .name(itemTwo.getName())
+                        .description(itemTwo.getDescription())
+                        .available(itemTwo.getAvailable())
+                        .requestId(requestTwo.getId())
                         .build()))
                 .build();
 
         return Stream.of(
                 Arguments.of(requester, List.of(requestOne), List.of(itemOne), List.of(requestDtoOne)),
-                Arguments.of(requester, List.of(requestOne, requestTwo), List.of(itemOne), List.of(requestDtoOne, requestDtoTwo))
+                Arguments.of(requester, List.of(requestOne, requestTwo), List.of(itemOne, itemTwo), List.of(requestDtoOne, requestDtoTwo))
         );
     }
 
