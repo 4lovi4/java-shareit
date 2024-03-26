@@ -131,6 +131,15 @@ class ItemRequestServiceImplTest {
                 .description("описание 1")
                 .available(true)
                 .request(requestOne)
+                .owner(owner)
+                .build();
+        Item itemTwo = Item.builder()
+                .id(2L)
+                .name("вещь 2")
+                .description("описание 2")
+                .available(true)
+                .request(requestOne)
+                .owner(owner)
                 .build();
         ItemRequestDto requestDtoOne = ItemRequestDto.builder()
                 .id(requestOne.getId())
@@ -145,9 +154,24 @@ class ItemRequestServiceImplTest {
                         .requestId(requestOne.getId())
                         .build()))
                 .build();
+        ItemRequestDto requestDtoTwo = ItemRequestDto.builder()
+                .id(requestOne.getId())
+                .created(requestTwo.getCreated())
+                .requester(requester.getId())
+                .description(requestTwo.getDescription())
+                .items(List.of(ItemResponse.builder()
+                        .id(itemOne.getId())
+                        .name(itemOne.getName())
+                        .description(itemOne.getDescription())
+                        .available(itemOne.getAvailable())
+                        .requestId(requestOne.getId())
+                        .build()))
+                .build();
 
         return Stream.of(
-                Arguments.of(requester, List.of(requestOne), List.of(itemOne), List.of(requestDtoOne)));
+                Arguments.of(requester, List.of(requestOne), List.of(itemOne), List.of(requestDtoOne)),
+                Arguments.of(requester, List.of(requestOne, requestTwo), List.of(itemOne), List.of(requestDtoOne, requestDtoTwo))
+        );
     }
 
     @ParameterizedTest
@@ -162,8 +186,9 @@ class ItemRequestServiceImplTest {
         when(itemRepository.findAllByRequest_IdIn(anyList()))
                 .thenReturn(storedItems);
         List<ItemRequestDto> allRequestsResponse = requestService.getAllRequests(user.getId());
-        log.info("expectedResponseRequests: {}", expectedResponseRequests.get(0));
-        log.info("allRequestsResponse: {}", allRequestsResponse.get(0));
+
+        verify(requestRepository, times(1)).findAllByRequester_IdOrderByCreatedDesc(anyLong());
+        verify(itemRepository, times(1)).findAllByRequest_IdIn(anyList());
         assertThat(allRequestsResponse, contains(expectedResponseRequests.toArray()));
     }
 
